@@ -51,14 +51,15 @@ if __name__ == "__main__":
     # Set environment variables
     os.environ["OMP_NUM_THREADS"] = args.omp_num_threads
     os.environ["TOKENIZERS_PARALLELISM"] = args.tokenizers_parallelism
-    os.environ["DEVICE"] = "cpu"
+    os.environ["DEVICE"] = "cuda"
     
     local_rank = int(os.environ["LOCAL_RANK"])
     global_rank = int(os.environ["RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
-    backend = "gloo"
-    device = torch.device("cpu")
-    dtype = torch.float32
+    backend = "nccl"
+    torch.cuda.set_device(local_rank)
+    device = torch.device("cuda", local_rank)
+    dtype = torch.bfloat16
 
     dist.init_process_group(rank=global_rank, world_size=world_size, backend=backend, init_method=f"env://", timeout=datetime.timedelta(minutes=2))
     setup_process_group_manager(tp_size=args.tp_size, cp_size=args.cp_size, pp_size=args.pp_size, dp_size=args.dp_size)

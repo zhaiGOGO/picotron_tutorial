@@ -2,15 +2,9 @@ import os
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
-
-def apply_rotary_pos_emb(x, cos, sin):
-    #TODO: Maybe do class RotaryEmbedding(nn.Module) later
-    batch_size, num_head, seq_length, head_dim = x.size()
-    x1 = x[..., : head_dim // 2]  
-    x2 = x[..., head_dim // 2 :]  
-    rotate_half = torch.cat([-x2, x1], dim=-1)
-    x = x * cos + rotate_half * sin
-    return x
+from flash_attn.flash_attn_interface import flash_attn_func
+from flash_attn.layers.rotary import apply_rotary_emb
+from flash_attn.ops.triton.layer_norm import layer_norm_fn
 
 def get_cos_sin(seq_length, head_dim, base=500000.0):
     assert head_dim%2==0
@@ -23,21 +17,29 @@ def get_cos_sin(seq_length, head_dim, base=500000.0):
     theta = theta.to(device)
     return torch.cos(position.float()*theta.float()).to(dtype).repeat(1,2), torch.sin(position.float()*theta.float()).to(dtype).repeat(1,2) # [seq_length, head_dim], [seq_length, head_dim]
 
-class LlamaRMSNorm(nn.Module):
-    def __init__(self, hidden_size, eps=1e-5):
-        """
-        LlamaRMSNorm is equivalent to T5LayerNorm
-        """
+class TritonRMSNorm(nn.Module):
+    def __init__(self, hidden_size, eps=1e-5, device=None, dtype=None):
+        factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
+        self.eps = eps
         self.weight = nn.Parameter(torch.ones(hidden_size))
-        self.variance_epsilon = eps
+        self.register_parameter("bias", None)
 
-    def forward(self, hidden_states):
-        input_dtype = hidden_states.dtype
-        hidden_states = hidden_states.to(torch.float32)
-        variance = hidden_states.pow(2).mean(-1, keepdim=True)
-        hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
-        return self.weight * hidden_states.to(input_dtype)
+    def forward(
+        self, hidden_states, residual=None, dropout_p=0.0, prenorm=False, residual_in_fp32=False, return_dropout_mask=False
+    ):
+        return layer_norm_fn(
+            hidden_states,
+            self.weight,
+            None,
+            residual=residual,
+            eps=self.eps,
+            dropout_p=dropout_p,
+            prenorm=prenorm,
+            residual_in_fp32=residual_in_fp32,
+            is_rms_norm=True,
+            return_dropout_mask=return_dropout_mask,
+        )
 
 class Attention(nn.Module):
     def __init__(self, config, layer_idx):
@@ -63,11 +65,13 @@ class Attention(nn.Module):
         k = self.k_proj(x) # [batch_size, seq_length, num_key_values*head_dim]
         v = self.v_proj(x) # [batch_size, seq_length, num_key_values*head_dim]
 
-        q = q.view(batch_size, seq_length, self.num_local_heads, self.head_dim).transpose(1, 2)       # [batch_size, num_heads, seq_length, head_dim]
-        k = k.view(batch_size, seq_length, self.num_local_kv_heads, self.head_dim).transpose(1, 2)  # [batch_size, num_key_values, seq_length, head_dim]
-        v = v.view(batch_size, seq_length, self.num_local_kv_heads, self.head_dim).transpose(1, 2)  # [batch_size, num_key_values, seq_length, head_dim]
-        q = apply_rotary_pos_emb(q, cos, sin)
-        k = apply_rotary_pos_emb(k, cos, sin)
+        q = q.view(batch_size, seq_length, self.num_local_heads, self.head_dim)       # [batch_size, seq_length, num_heads, head_dim]
+        k = k.view(batch_size, seq_length, self.num_local_kv_heads, self.head_dim)  # [batch_size, seq_length, num_key_values, head_dim]
+        q = apply_rotary_emb(q,cos[:, :self.head_dim // 2], sin[:, :self.head_dim // 2],interleaved=False) # [batch_size, seq_length, num_heads, head_dim]
+        k = apply_rotary_emb(k,cos[:, :self.head_dim // 2], sin[:, :self.head_dim // 2],interleaved=False) # [batch_size, seq_length, num_key_values, head_dim]
+        q = q.transpose(1, 2)                                                                   # [batch_size, num_heads, seq_length, head_dim]
+        k = k.transpose(1, 2)                                                                   # [batch_size, num_key_values, seq_length, head_dim]
+        v = v.view(batch_size, seq_length, self.num_local_kv_heads, self.head_dim).transpose(1,2)   # [batch_size, num_key_values, seq_length, head_dim]
      
         k = k.repeat_interleave(self.num_local_heads // self.num_local_kv_heads, dim=1) # [batch_size, num_heads, seq_length, head_dim]
         v = v.repeat_interleave(self.num_local_heads // self.num_local_kv_heads, dim=1) # [batch_size, num_heads, seq_length, head_dim]
@@ -95,11 +99,11 @@ class MLP(nn.Module):
         return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))
 
 class DecoderLayer(nn.Module):
-    # LlamaRMSNorm -> Attention -> Residual -> LlamaRMSNorm -> MLP -> Residual
+    # TritonRMSNorm -> Attention -> Residual -> TritonRMSNorm -> MLP -> Residual
     def __init__(self, config, layer_idx):
         super().__init__()
-        self.input_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-        self.post_attention_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+        self.input_layernorm = TritonRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+        self.post_attention_layernorm = TritonRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.attention = Attention(config, layer_idx = layer_idx)
         self.mlp = MLP(config)
         self.layer_idx = layer_idx
@@ -134,7 +138,7 @@ class Llama(nn.Module):
         self.embedding = nn.Embedding(self.vocab_size, self.hidden_size)
         self.decoder_layers = nn.ModuleList([DecoderLayer(config,layer_idx = i) for i in range(self.num_layers)])
         self.final_proj = nn.Linear(self.hidden_size, self.vocab_size, bias=False)
-        self.final_norm = LlamaRMSNorm(self.hidden_size, eps=config.rms_norm_eps)
+        self.final_norm = TritonRMSNorm(self.hidden_size, eps=config.rms_norm_eps)
         
     def forward(self, input_ids, attention_mask=None, position_ids: torch.Tensor = None):
         x = self.embedding(input_ids)
@@ -144,12 +148,3 @@ class Llama(nn.Module):
         logits = self.final_proj(x)
         
         return logits  # [batch_size, seq_length, vocab_size]
-    
-    # https://github.com/karpathy/nanoGPT/blob/9755682b981a45507f6eb9b11eadef8cb83cebd5/model.py#L289-L303
-    # TODO: Need to check the formula.
-    def get_flops(self, fwdbwd_per_iter, dt, num_params):
-        L, H, T = self.num_layers , self.hidden_size, self.max_position_embeddings
-        flops_per_fwdbwd = 6 * num_params * T + 12* L* H* T ** 2
-        flops_per_iter = flops_per_fwdbwd * fwdbwd_per_iter
-        flops_achieved = flops_per_iter * (1.0/dt) # per second
-        return flops_achieved
