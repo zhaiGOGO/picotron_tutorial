@@ -1,5 +1,5 @@
 """
-torchrun --nproc_per_node 2 train.py --dp_size 2 --use_wandb
+torchrun --nproc_per_node 2 train.py --pp_size 2 --use_wandb
 """
 import os
 import wandb
