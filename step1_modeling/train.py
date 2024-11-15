@@ -2,8 +2,10 @@
 torchrun --nproc_per_node 1 train.py 
 """
 import os
+import datetime
 import torch
 import torch.nn.functional as F
+import torch.distributed as dist
 import argparse
 from torch.optim import AdamW
 from transformers import AutoConfig
@@ -47,6 +49,8 @@ if __name__ == "__main__":
     device = torch.device("cpu")
     dtype = torch.float32
 
+    dist.init_process_group(rank=global_rank, world_size=world_size, backend=backend, init_method=f"env://", timeout=datetime.timedelta(minutes=2))
+
     set_all_seed(args.seed)
 
     model_config = AutoConfig.from_pretrained(args.model_name)
@@ -59,7 +63,11 @@ if __name__ == "__main__":
     model.to(dtype).to(device)            
     model.train()
 
+    dist.barrier()
+
     optimizer = AdamW(model.parameters(), lr=args.learning_rate)
+
+    dist.barrier()
     
     # Create dummy data
     input_ids = torch.randint(0, model_config.vocab_size, (args.micro_batch_size, args.seq_length), device=device)
@@ -83,3 +91,5 @@ if __name__ == "__main__":
     optimizer.step()
 
     print(f"Loss: {loss.item():.4f}", is_print_rank=(global_rank == 0))
+
+    dist.destroy_process_group()
