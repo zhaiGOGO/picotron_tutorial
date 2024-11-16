@@ -11,7 +11,7 @@ from .tp_utils import split_tensor_along_last_dim
 def _reduce(input_):
     """All-reduce the input tensor across model parallel(Tensor Parallel) group."""    
     # Bypass the function if we are using only 1 GPU.
-    if pgm.process_group_manager.tp_size == 1:
+    if pgm.process_group_manager.tp_world_size == 1:
         return input_
 
     # All-reduce across the tensor parallel group
@@ -50,7 +50,7 @@ def reduce_from_model_parallel_region(input_: torch.Tensor) -> torch.Tensor:
 def _split(input_: torch.Tensor) -> torch.Tensor:
     """Split the tensor along its last dimension and keep the corresponding slice."""
     tp_rank = pgm.process_group_manager.tp_rank
-    tp_world_size = pgm.process_group_manager.tp_size
+    tp_world_size = pgm.process_group_manager.tp_world_size
 
     # Bypass the function if we are using only 1 GPU
     if tp_world_size == 1:
@@ -65,7 +65,7 @@ def _split(input_: torch.Tensor) -> torch.Tensor:
 def _gather(input_: torch.Tensor) -> torch.Tensor:
     """Gather tensors and concatinate along the last dimension."""
     tp_rank = pgm.process_group_manager.tp_rank
-    tp_world_size = pgm.process_group_manager.tp_size
+    tp_world_size = pgm.process_group_manager.tp_world_size
 
     # Bypass the function if we are using only 1 GPU.
     if tp_world_size == 1:
