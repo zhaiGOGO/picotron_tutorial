@@ -20,7 +20,7 @@ import process_group_manager as pgm
 from process_group_manager import setup_process_group_manager
 from utils import set_all_seed, print, to_readable_format
 
-from tensor_parallel.tensor_parallel import apply_tensor_parallel, initialize_weight_tensor
+from tensor_parallel import apply_tensor_parallel
 
 def train_step(model, dataloader, device):
     acc_loss = 0.0
@@ -38,13 +38,12 @@ def train_step(model, dataloader, device):
         target_ids = target_ids.reshape(-1)
         outputs = outputs.view(seq_len*batch_size, -1)
         loss = F.cross_entropy(outputs, target_ids, reduction='mean') / dataloader.grad_acc_steps
-        
+
         loss.backward()
 
         acc_loss += loss.item()
 
     return acc_loss
-
 
 if __name__ == "__main__":    
     parser = argparse.ArgumentParser(description="Training script for LLaMA model")
@@ -130,9 +129,9 @@ if __name__ == "__main__":
     model = Llama(config=model_config)
 
     if pgm.process_group_manager.tp_world_size > 1:
-        model = apply_tensor_parallel(model, init_method=initialize_weight_tensor)
+        model = apply_tensor_parallel(model)
 
-    model.to(dtype).to(device)            
+    model.to(dtype).to(device)
     model.train()
 
     dist.barrier()
@@ -175,7 +174,7 @@ if __name__ == "__main__":
 
         trained_token += tokens_per_step
         step += 1
-      
+    
         print(f"[rank {pgm.process_group_manager.global_rank}] Step: {step}, Loss: {loss:.4f}, "
             f"Global batch size (with seq_len): {to_readable_format(tokens_per_step)}, "
             f"Tokens/s: {to_readable_format(tokens_per_step / step_duration)}, "
