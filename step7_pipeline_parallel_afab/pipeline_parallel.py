@@ -138,4 +138,5 @@ def train_step_pipeline_afab(model, data_loader, tensor_shapes, device, dtype):
         pipeline_communicate(operation='send_backward', tensor=input_tensor_grad, device=device, dtype=dtype)
 
     return logging_loss
+
 ### end Pipeline Parallel
