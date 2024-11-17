@@ -8,12 +8,12 @@ Binary files step6_data_parallel_bucket/__pycache__/tensor_parallel.cpython-39.p
 Binary files step6_data_parallel_bucket/__pycache__/utils.cpython-39.pyc and step7_pipeline_parallel_afab/__pycache__/utils.cpython-39.pyc differ
 Only in step7_pipeline_parallel_afab/: pipeline_parallel.py
 diff -ur step6_data_parallel_bucket/train.py step7_pipeline_parallel_afab/train.py
---- step6_data_parallel_bucket/train.py	2024-11-17 14:53:04.000000000 +0000
-+++ step7_pipeline_parallel_afab/train.py	2024-11-17 14:52:47.000000000 +0000
+--- step6_data_parallel_bucket/train.py	2024-11-17 14:56:25.000000000 +0000
++++ step7_pipeline_parallel_afab/train.py	2024-11-17 14:57:04.000000000 +0000
 @@ -1,5 +1,5 @@
  """
--torchrun --nproc_per_node 2 train.py --dp_size 2 --micro_batch_size 2 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name dp_bucket_test --use_wandb
-+torchrun --nproc_per_node 2 train.py --pp_size 2 --pp_engine afab --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_afab --use_wandb
+-torchrun --nproc_per_node 4 train.py --dp_size 4 --micro_batch_size 1 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name dp_bucket --use_wandb
++torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine afab --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_afab --use_wandb
  """
  import os
  import time

@@ -139,12 +139,12 @@ diff -ur step7_pipeline_parallel_afab/pipeline_parallel.py step8_pipeline_parall
  ### end Pipeline Parallel
 \ No newline at end of file
 diff -ur step7_pipeline_parallel_afab/train.py step8_pipeline_parallel_1f1b/train.py
---- step7_pipeline_parallel_afab/train.py	2024-11-17 13:26:37.000000000 +0000
-+++ step8_pipeline_parallel_1f1b/train.py	2024-11-17 13:38:43.000000000 +0000
+--- step7_pipeline_parallel_afab/train.py	2024-11-17 14:57:04.000000000 +0000
++++ step8_pipeline_parallel_1f1b/train.py	2024-11-17 14:57:17.000000000 +0000
 @@ -1,5 +1,5 @@
  """
--torchrun --nproc_per_node 2 train.py --pp_size 2 --pp_engine afab --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_afab --use_wandb
-+torchrun --nproc_per_node 2 train.py --pp_size 2 --pp_engine 1f1b --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_1f1b --use_wandb
+-torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine afab --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_afab --use_wandb
++torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine 1f1b --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_1f1b --use_wandb
  """
  import os
  import time

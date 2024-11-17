@@ -1,5 +1,5 @@
 """
-torchrun --nproc_per_node 2 train.py --pp_size 2 --pp_engine 1f1b --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_1f1b --use_wandb
+torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine 1f1b --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_1f1b --use_wandb
 """
 import os
 import time
