@@ -1,5 +1,5 @@
 """
-torchrun --nproc_per_node 3 train.py --tp_size 3 --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --use_wandb
+torchrun --nproc_per_node 4 train.py --tp_size 4 --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name tp_naive --use_wandb
 """
 import os
 import time
@@ -24,7 +24,7 @@ from tensor_parallel import apply_tensor_parallel
 
 def train_step(model, dataloader, device):
     acc_loss = 0.0
-    
+
     for i in range(dataloader.grad_acc_steps):
         # get the next batch
         batch = next(dataloader)
@@ -73,7 +73,6 @@ if __name__ == "__main__":
     
     # Distributed training arguments
     parser.add_argument("--tp_size", type=int, default=1, help="Tensor Parallel size")
-    parser.add_argument("--cp_size", type=int, default=1, help="Context Parallel size")
     parser.add_argument("--dp_size", type=int, default=1, help="Data Parallel size")
     parser.add_argument("--pp_size", type=int, default=1, help="Pipeline Parallel size")
     parser.add_argument("--pp_engine", type=str, default="afab", choices=["1f1b", "afab"])
@@ -98,11 +97,9 @@ if __name__ == "__main__":
     dtype = torch.bfloat16
 
     dist.init_process_group(rank=global_rank, world_size=world_size, backend=backend, init_method=f"env://", timeout=datetime.timedelta(minutes=2))
-    setup_process_group_manager(tp_size=args.tp_size, cp_size=args.cp_size, pp_size=args.pp_size, dp_size=args.dp_size)
+    setup_process_group_manager(dp_size=args.dp_size, pp_size=args.pp_size, tp_size=args.tp_size)
 
-    assert world_size == args.tp_size * args.pp_size * args.dp_size * args.cp_size, "world_size must be equal to tp_size * pp_size * dp_size * cp_size"
-
-    is_wandb_rank = pgm.process_group_manager.tp_rank == 0 and pgm.process_group_manager.dp_rank == 0 and pgm.process_group_manager.cp_rank == 0 and pgm.process_group_manager.pp_is_last_stage
+    is_wandb_rank = pgm.process_group_manager.tp_rank == 0 and pgm.process_group_manager.dp_rank == 0 and pgm.process_group_manager.pp_is_last_stage
     set_all_seed(args.seed)
 
     if is_wandb_rank and args.use_wandb:
@@ -111,7 +108,6 @@ if __name__ == "__main__":
             name=f"{args.run_name}_{pgm.process_group_manager}",
             config={
                 "tensor_parallel_size": pgm.process_group_manager.tp_world_size,
-                "context_parallel_size": pgm.process_group_manager.cp_world_size,
                 "pipeline_parallel_size": pgm.process_group_manager.pp_world_size,
                 "data_parallel_size": pgm.process_group_manager.dp_world_size,
                 "model": args.model_name,
@@ -171,7 +167,6 @@ if __name__ == "__main__":
         optimizer.step()
 
         step_duration = time.time() - step_start_time
-
         trained_token += tokens_per_step
         step += 1
     
