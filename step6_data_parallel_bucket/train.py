@@ -15,7 +15,7 @@ from transformers import AutoConfig
 import lovely_tensors as lt; lt.monkey_patch()
 
 from model import Llama
-from step6_data_parallel_bucket.dataloader import MicroBatchDataLoader
+from dataloader import MicroBatchDataLoader
 import process_group_manager as pgm
 from process_group_manager import setup_process_group_manager
 from utils import set_all_seed, print, to_readable_format
