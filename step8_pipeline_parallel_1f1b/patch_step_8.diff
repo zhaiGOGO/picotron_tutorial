@@ -1,11 +1,11 @@
 Binary files step7_pipeline_parallel_afab/__pycache__/data_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/data_parallel.cpython-39.pyc differ
-Only in step7_pipeline_parallel_afab/__pycache__: dataloader.cpython-39.pyc
+Binary files step7_pipeline_parallel_afab/__pycache__/dataloader.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/dataloader.cpython-39.pyc differ
 Binary files step7_pipeline_parallel_afab/__pycache__/model.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/model.cpython-39.pyc differ
 Binary files step7_pipeline_parallel_afab/__pycache__/pipeline_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/pipeline_parallel.cpython-39.pyc differ
 Binary files step7_pipeline_parallel_afab/__pycache__/process_group_manager.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/process_group_manager.cpython-39.pyc differ
 Binary files step7_pipeline_parallel_afab/__pycache__/tensor_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/tensor_parallel.cpython-39.pyc differ
 Binary files step7_pipeline_parallel_afab/__pycache__/utils.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/utils.cpython-39.pyc differ
-diff -ur step7_pipeline_parallel_afab/pipeline_parallel.py step8_pipeline_parallel_1f1b/pipeline_parallel.py
+diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/pipeline_parallel.py step8_pipeline_parallel_1f1b/pipeline_parallel.py
 --- step7_pipeline_parallel_afab/pipeline_parallel.py	2024-11-17 14:49:34.000000000 +0000
 +++ step8_pipeline_parallel_1f1b/pipeline_parallel.py	2024-11-17 13:39:38.000000000 +0000
 @@ -69,6 +69,59 @@
@@ -138,7 +138,7 @@ diff -ur step7_pipeline_parallel_afab/pipeline_parallel.py step8_pipeline_parall
 +    return logging_loss
  ### end Pipeline Parallel
 \ No newline at end of file
-diff -ur step7_pipeline_parallel_afab/train.py step8_pipeline_parallel_1f1b/train.py
+diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/train.py step8_pipeline_parallel_1f1b/train.py
 --- step7_pipeline_parallel_afab/train.py	2024-11-17 14:57:04.000000000 +0000
 +++ step8_pipeline_parallel_1f1b/train.py	2024-11-17 14:57:17.000000000 +0000
 @@ -1,5 +1,5 @@
