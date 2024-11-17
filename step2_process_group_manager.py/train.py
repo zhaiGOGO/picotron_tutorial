@@ -1,5 +1,5 @@
 """
-torchrun --nproc_per_node 2 train.py --pp_size 2 --use_wandb
+torchrun --nproc_per_node 2 train.py --tp_size 2 --run_name process_group_manager --use_wandb
 """
 import os
 import wandb
@@ -25,19 +25,18 @@ if __name__ == "__main__":
 
     # Model arguments
     parser.add_argument("--model_name", type=str, default="HuggingFaceTB/SmolLM-360M-Instruct")
-    parser.add_argument("--num_hidden_layers", type=int, default=8)
-    parser.add_argument("--num_attention_heads", type=int, default=8)
+    parser.add_argument("--num_hidden_layers", type=int, default=32)
+    parser.add_argument("--num_attention_heads", type=int, default=16)
     parser.add_argument("--num_key_value_heads", type=int, default=4)
-    
+
     # Training arguments
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--learning_rate", type=float, default=3e-4)
-    parser.add_argument("--seq_length", type=int, default=2048)
+    parser.add_argument("--seq_len", type=int, default=32)
     parser.add_argument("--micro_batch_size", type=int, default=1)
     
     # Distributed training arguments
     parser.add_argument("--tp_size", type=int, default=1, help="Tensor Parallel size")
-    parser.add_argument("--cp_size", type=int, default=1, help="Context Parallel size")
     parser.add_argument("--dp_size", type=int, default=1, help="Data Parallel size")
     parser.add_argument("--pp_size", type=int, default=1, help="Pipeline Parallel size")
     parser.add_argument("--pp_engine", type=str, default="afab", choices=["1f1b", "afab"])
@@ -62,22 +61,19 @@ if __name__ == "__main__":
     dtype = torch.bfloat16
 
     dist.init_process_group(rank=global_rank, world_size=world_size, backend=backend, init_method=f"env://", timeout=datetime.timedelta(minutes=2))
-    setup_process_group_manager(tp_size=args.tp_size, cp_size=args.cp_size, pp_size=args.pp_size, dp_size=args.dp_size)
+    setup_process_group_manager(dp_size=args.dp_size, pp_size=args.pp_size, tp_size=args.tp_size)
 
-    assert world_size == args.tp_size * args.pp_size * args.dp_size * args.cp_size, "world_size must be equal to tp_size * pp_size * dp_size * cp_size"
-
-    is_wandb_rank = pgm.process_group_manager.tp_rank == 0 and pgm.process_group_manager.dp_rank == 0 and pgm.process_group_manager.cp_rank == 0 and pgm.process_group_manager.pp_is_last_stage
+    is_wandb_rank = pgm.process_group_manager.tp_rank == 0 and pgm.process_group_manager.dp_rank == 0 and pgm.process_group_manager.pp_is_last_stage
     set_all_seed(args.seed)
 
     if is_wandb_rank and args.use_wandb:
         wandb.init(
-            project="picotron",
+            project="picotron_tutorial",
             name=f"{args.run_name}_{pgm.process_group_manager}",
             config={
-                "tensor_parallel_size": pgm.process_group_manager.tp_size,
-                "context_parallel_size": pgm.process_group_manager.cp_size,
-                "pipeline_parallel_size": pgm.process_group_manager.pp_size,
-                "data_parallel_size": pgm.process_group_manager.dp_size,
+                "tensor_parallel_size": pgm.process_group_manager.tp_world_size,
+                "pipeline_parallel_size": pgm.process_group_manager.pp_world_size,
+                "data_parallel_size": pgm.process_group_manager.dp_world_size,
                 "model": args.model_name,
                 "learning_rate": args.learning_rate,
                 "seed": args.seed,
@@ -88,7 +84,7 @@ if __name__ == "__main__":
     model_config.num_hidden_layers = args.num_hidden_layers
     model_config.num_attention_heads = args.num_attention_heads
     model_config.num_key_value_heads = args.num_key_value_heads
-    model_config.max_position_embeddings = args.seq_length
+    model_config.max_position_embeddings = args.seq_len
 
     model = Llama(config=model_config)
     model.to(dtype).to(device)            
@@ -101,8 +97,8 @@ if __name__ == "__main__":
     dist.barrier()
     
     # Create dummy data
-    input_ids = torch.randint(0, model_config.vocab_size, (args.micro_batch_size, args.seq_length), device=device)
-    target_ids = torch.randint(0, model_config.vocab_size, (args.micro_batch_size, args.seq_length), device=device)
+    input_ids = torch.randint(0, model_config.vocab_size, (args.micro_batch_size, args.seq_len), device=device)
+    target_ids = torch.randint(0, model_config.vocab_size, (args.micro_batch_size, args.seq_len), device=device)
 
     # Training step
     optimizer.zero_grad()

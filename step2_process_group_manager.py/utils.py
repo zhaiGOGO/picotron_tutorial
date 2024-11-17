@@ -19,14 +19,22 @@ def set_all_seed(seed):
     torch.manual_seed(seed)
     if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
     
-def to_readable_format(num, precision=2):
-    if num >= 1e12:
-        return f"{num / 1e12:.{precision}f}T"
-    elif num >= 1e9:
-        return f"{num / 1e9:.{precision}f}B"
-    elif num >= 1e6:
-        return f"{num / 1e6:.{precision}f}M"
-    elif num >= 1e3:
-        return f"{num / 1e3:.{precision}f}K"
+def to_readable_format(num, precision=3):
+    num_str = str(num)
+    length = len(num_str)
+    
+    def format_with_precision(main, decimal, suffix):
+        if precision == 0:
+            return f"{main}{suffix}"
+        return f"{main}.{decimal[:precision]}{suffix}"
+    
+    if length > 12:  # Trillions
+        return format_with_precision(num_str[:-12], num_str[-12:], 'T')
+    elif length > 9:  # Billions
+        return format_with_precision(num_str[:-9], num_str[-9:], 'B')
+    elif length > 6:  # Millions
+        return format_with_precision(num_str[:-6], num_str[-6:], 'M')
+    elif length > 3:  # Thousands
+        return format_with_precision(num_str[:-3], num_str[-3:], 'K')
     else:
-        return f"{num:.{precision}f}"
+        return num_str
