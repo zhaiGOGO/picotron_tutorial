@@ -10,7 +10,7 @@ class ProcessGroupManager:
         
         assert self.world_size == dp_size * pp_size * tp_size, f"World size ({self.world_size}) != DP ({self.dp_size}) * PP ({self.pp_size}) * TP ({self.tp_size})"
 
-        self.grid = torch.arange(self.world_size).view(dp_size, pp_size,  tp_size)  # DP * PP * CP * TP grid
+        self.grid = torch.arange(self.world_size).view(dp_size, pp_size, tp_size)  # DP * PP * TP grid
         # Find the position of the current process in the grid
         self.dp_rank, self.pp_rank, self.tp_rank = (self.grid == self.global_rank).nonzero().flatten().tolist()
 
@@ -31,7 +31,7 @@ class ProcessGroupManager:
         self.tp_world_size = dist.get_world_size(group=self.tp_group)
         self.tp_first_rank = self.tp_group_ids[0]
         self.tp_last_rank = self.tp_group_ids[-1]
-        
+
         # Pipeline parallelism
         self.pp_world_size = dist.get_world_size(group=self.pp_group)
         self.pp_first_rank = self.pp_group_ids[0]

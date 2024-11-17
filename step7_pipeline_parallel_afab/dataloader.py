@@ -7,8 +7,6 @@ from transformers import AutoTokenizer
 
 import process_group_manager as pgm
 
-from utils import print
-
 class MicroBatchDataLoader(DataLoader):
     def __init__(self, seq_len, micro_batch_size, grad_acc_steps, dataset_name, tokenizer_name, max_tokens, num_workers, num_proc, seed, split="train"):
         
@@ -17,6 +15,7 @@ class MicroBatchDataLoader(DataLoader):
         self.seq_len = seq_len
 
         self.global_batch_size = micro_batch_size * grad_acc_steps * pgm.process_group_manager.dp_world_size
+
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
         self.dataset = load_dataset(dataset_name, split=split)
 
