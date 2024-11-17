@@ -1,5 +1,5 @@
 """
-torchrun --nproc_per_node 3 train.py --tp_size 3 --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --use_wandb
+torchrun --nproc_per_node 4 train.py --dp_size 4 --micro_batch_size 1 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name dp_naive --use_wandb
 """
 import os
 import time
