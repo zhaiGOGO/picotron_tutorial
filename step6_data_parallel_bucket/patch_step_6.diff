@@ -1,9 +1,3 @@
-Binary files step5_data_parallel_naive/__pycache__/data.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/data.cpython-39.pyc differ
-Binary files step5_data_parallel_naive/__pycache__/data_parallel.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/data_parallel.cpython-39.pyc differ
-Binary files step5_data_parallel_naive/__pycache__/model.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/model.cpython-39.pyc differ
-Binary files step5_data_parallel_naive/__pycache__/process_group_manager.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/process_group_manager.cpython-39.pyc differ
-Binary files step5_data_parallel_naive/__pycache__/tensor_parallel.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/tensor_parallel.cpython-39.pyc differ
-Binary files step5_data_parallel_naive/__pycache__/utils.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/utils.cpython-39.pyc differ
 diff -x '*.diff' --new-file -ur step5_data_parallel_naive/data_parallel.py step6_data_parallel_bucket/data_parallel.py
 --- step5_data_parallel_naive/data_parallel.py	2024-11-17 13:09:01.000000000 +0000
 +++ step6_data_parallel_bucket/data_parallel.py	2024-11-17 13:08:38.000000000 +0000
