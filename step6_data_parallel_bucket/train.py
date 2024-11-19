@@ -23,15 +23,6 @@ from utils import set_all_seed, print, to_readable_format
 from tensor_parallel import apply_tensor_parallel
 from data_parallel import DataParallelBucket
 
-def all_reduce_loss_across_dp_ranks(loss, device):
-    reduced_loss = torch.tensor([loss if loss is not None else 0.0], dtype=torch.float32, device=device)
-    # only the last stage of the pipeline parallelism contains the loss
-    # we need to average the loss among the data/context parallel group
-    if pgm.process_group_manager.pp_is_last_stage:
-        dist.all_reduce(reduced_loss, op=dist.ReduceOp.AVG, group=pgm.process_group_manager.dp_group)
-    return reduced_loss.item()
-
-
 def train_step(model, dataloader, device):
     acc_loss = 0.0
 
@@ -186,8 +177,6 @@ if __name__ == "__main__":
         optimizer.zero_grad()
 
         loss = train_step(model, dataloader, device)
-
-        loss = all_reduce_loss_across_dp_ranks(loss, device)
 
         optimizer.step()
 

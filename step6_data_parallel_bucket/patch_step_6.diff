@@ -1,3 +1,10 @@
+Binary files step5_data_parallel_naive/__pycache__/data.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/data.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/data_parallel.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/data_parallel.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/dataloader.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/dataloader.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/model.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/model.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/process_group_manager.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/process_group_manager.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/tensor_parallel.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/tensor_parallel.cpython-39.pyc differ
+Binary files step5_data_parallel_naive/__pycache__/utils.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/utils.cpython-39.pyc differ
 diff -x '*.diff' --new-file -ur step5_data_parallel_naive/data_parallel.py step6_data_parallel_bucket/data_parallel.py
 --- step5_data_parallel_naive/data_parallel.py	2024-11-17 13:09:01.000000000 +0000
 +++ step6_data_parallel_bucket/data_parallel.py	2024-11-17 13:08:38.000000000 +0000
@@ -239,8 +246,8 @@ diff -x '*.diff' --new-file -ur step5_data_parallel_naive/data_parallel.py step6
 +### end Data Parallel (bucket)
 \ No newline at end of file
 diff -x '*.diff' --new-file -ur step5_data_parallel_naive/train.py step6_data_parallel_bucket/train.py
---- step5_data_parallel_naive/train.py	2024-11-17 15:00:01.000000000 +0000
-+++ step6_data_parallel_bucket/train.py	2024-11-17 14:56:25.000000000 +0000
+--- step5_data_parallel_naive/train.py	2024-11-19 14:16:50.000000000 +0000
++++ step6_data_parallel_bucket/train.py	2024-11-19 14:17:08.000000000 +0000
 @@ -1,5 +1,5 @@
  """
 -torchrun --nproc_per_node 4 train.py --dp_size 4 --micro_batch_size 1 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name dp_naive --use_wandb
@@ -255,9 +262,9 @@ diff -x '*.diff' --new-file -ur step5_data_parallel_naive/train.py step6_data_pa
 -from data_parallel import DataParallelNaive
 +from data_parallel import DataParallelBucket
  
- def all_reduce_loss_across_dp_ranks(loss, device):
-     reduced_loss = torch.tensor([loss if loss is not None else 0.0], dtype=torch.float32, device=device)
-@@ -148,7 +148,7 @@
+ def train_step(model, dataloader, device):
+     acc_loss = 0.0
+@@ -139,7 +139,7 @@
      model.to(dtype).to(device)
  
      if pgm.process_group_manager.dp_world_size > 1:

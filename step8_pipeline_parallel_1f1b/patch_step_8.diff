@@ -1,3 +1,10 @@
+Binary files step7_pipeline_parallel_afab/__pycache__/data_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/data_parallel.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/dataloader.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/dataloader.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/model.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/model.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/pipeline_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/pipeline_parallel.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/process_group_manager.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/process_group_manager.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/tensor_parallel.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/tensor_parallel.cpython-39.pyc differ
+Binary files step7_pipeline_parallel_afab/__pycache__/utils.cpython-39.pyc and step8_pipeline_parallel_1f1b/__pycache__/utils.cpython-39.pyc differ
 diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/pipeline_parallel.py step8_pipeline_parallel_1f1b/pipeline_parallel.py
 --- step7_pipeline_parallel_afab/pipeline_parallel.py	2024-11-17 14:49:34.000000000 +0000
 +++ step8_pipeline_parallel_1f1b/pipeline_parallel.py	2024-11-17 13:39:38.000000000 +0000
@@ -132,8 +139,8 @@ diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/pipeline_parallel.p
  ### end Pipeline Parallel
 \ No newline at end of file
 diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/train.py step8_pipeline_parallel_1f1b/train.py
---- step7_pipeline_parallel_afab/train.py	2024-11-17 14:57:04.000000000 +0000
-+++ step8_pipeline_parallel_1f1b/train.py	2024-11-17 14:57:17.000000000 +0000
+--- step7_pipeline_parallel_afab/train.py	2024-11-19 14:20:01.000000000 +0000
++++ step8_pipeline_parallel_1f1b/train.py	2024-11-19 14:21:00.000000000 +0000
 @@ -1,5 +1,5 @@
  """
 -torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine afab --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name pp_afab --use_wandb
@@ -150,7 +157,7 @@ diff -x '*.diff' --new-file -ur step7_pipeline_parallel_afab/train.py step8_pipe
  from data_parallel import DataParallelBucket
  
  def all_reduce_loss_across_dp_ranks(loss, device):
-@@ -194,6 +194,8 @@
+@@ -193,6 +193,8 @@
          if pgm.process_group_manager.pp_world_size > 1:
              if args.pp_engine == "afab":
                  loss = train_step_pipeline_afab(model, dataloader, tensor_shapes, device, dtype)

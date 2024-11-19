@@ -1,3 +1,10 @@
+Binary files step4_tensor_parallel/__pycache__/data.cpython-39.pyc and step5_data_parallel_naive/__pycache__/data.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/data_parallel.cpython-39.pyc and step5_data_parallel_naive/__pycache__/data_parallel.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/dataloader.cpython-39.pyc and step5_data_parallel_naive/__pycache__/dataloader.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/model.cpython-39.pyc and step5_data_parallel_naive/__pycache__/model.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/process_group_manager.cpython-39.pyc and step5_data_parallel_naive/__pycache__/process_group_manager.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/tensor_parallel.cpython-39.pyc and step5_data_parallel_naive/__pycache__/tensor_parallel.cpython-39.pyc differ
+Binary files step4_tensor_parallel/__pycache__/utils.cpython-39.pyc and step5_data_parallel_naive/__pycache__/utils.cpython-39.pyc differ
 diff -x '*.diff' --new-file -ur step4_tensor_parallel/data_parallel.py step5_data_parallel_naive/data_parallel.py
 --- step4_tensor_parallel/data_parallel.py	1970-01-01 00:00:00.000000000 +0000
 +++ step5_data_parallel_naive/data_parallel.py	2024-11-17 13:09:01.000000000 +0000
@@ -92,7 +99,7 @@ diff -x '*.diff' --new-file -ur step4_tensor_parallel/dataloader.py step5_data_p
  
 diff -x '*.diff' --new-file -ur step4_tensor_parallel/train.py step5_data_parallel_naive/train.py
 --- step4_tensor_parallel/train.py	2024-11-17 15:05:11.000000000 +0000
-+++ step5_data_parallel_naive/train.py	2024-11-17 15:00:01.000000000 +0000
++++ step5_data_parallel_naive/train.py	2024-11-19 14:16:50.000000000 +0000
 @@ -1,5 +1,5 @@
  """
 -torchrun --nproc_per_node 4 train.py --tp_size 4 --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 128 --max_tokens 40960 --num_proc 16 --run_name tp_naive --use_wandb
@@ -100,20 +107,11 @@ diff -x '*.diff' --new-file -ur step4_tensor_parallel/train.py step5_data_parall
  """
  import os
  import time
-@@ -21,16 +21,32 @@
+@@ -21,16 +21,23 @@
  from utils import set_all_seed, print, to_readable_format
  
  from tensor_parallel import apply_tensor_parallel
 +from data_parallel import DataParallelNaive
-+
-+def all_reduce_loss_across_dp_ranks(loss, device):
-+    reduced_loss = torch.tensor([loss if loss is not None else 0.0], dtype=torch.float32, device=device)
-+    # only the last stage of the pipeline parallelism contains the loss
-+    # we need to average the loss among the data/context parallel group
-+    if pgm.process_group_manager.pp_is_last_stage:
-+        dist.all_reduce(reduced_loss, op=dist.ReduceOp.AVG, group=pgm.process_group_manager.dp_group)
-+    return reduced_loss.item()
-+
  
  def train_step(model, dataloader, device):
      acc_loss = 0.0
@@ -133,7 +131,7 @@ diff -x '*.diff' --new-file -ur step4_tensor_parallel/train.py step5_data_parall
          outputs = model(input_ids=input_ids)
  
          # compute the loss
-@@ -127,7 +143,13 @@
+@@ -127,7 +134,13 @@
      if pgm.process_group_manager.tp_world_size > 1:
          model = apply_tensor_parallel(model)
  
@@ -147,7 +145,7 @@ diff -x '*.diff' --new-file -ur step4_tensor_parallel/train.py step5_data_parall
      model.train()
  
      dist.barrier()
-@@ -146,6 +168,7 @@
+@@ -146,6 +159,7 @@
          max_tokens=args.max_tokens,
          num_workers=args.num_workers,
          num_proc=args.num_proc,
@@ -155,14 +153,7 @@ diff -x '*.diff' --new-file -ur step4_tensor_parallel/train.py step5_data_parall
      )
     
      tokens_per_step = dataloader.global_batch_size * args.seq_len
-@@ -164,11 +187,17 @@
- 
-         loss = train_step(model, dataloader, device)
- 
-+        loss = all_reduce_loss_across_dp_ranks(loss, device)
-+
-         optimizer.step()
- 
+@@ -169,6 +183,10 @@
          step_duration = time.time() - step_start_time
          trained_token += tokens_per_step
          step += 1
