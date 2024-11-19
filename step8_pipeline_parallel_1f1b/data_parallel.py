@@ -30,18 +30,7 @@ class DataParallelNaive(nn.Module):
         if self.require_backward_grad_sync:
             dist.all_reduce(grad, op=dist.ReduceOp.SUM, group=pgm.process_group_manager.dp_group)
             grad /= pgm.process_group_manager.dp_world_size
-        return grad 
-    
-    @contextlib.contextmanager
-    def no_sync(self):
-        """
-        A context manager to temporarily disable gradient synchronization. 
-        This is useful for performing multiple backward passes during gradient accumulation without synchronizing 
-        gradients in between.
-        """
-        self.require_backward_grad_sync = False
-        yield
-        self.require_backward_grad_sync = True
+        return grad
 
 ### end Data Parallel (naive)
 
@@ -247,14 +236,7 @@ class DataParallelBucket(nn.Module):
                     # mark the parameter as ready for gradient synchronization. 
                     bucket_manager.mark_param_as_ready(param) 
         return param_hook
-    
-    @contextlib.contextmanager
-    def no_sync(self):
-        """A context manager to disable gradient synchronization."""
-        self.require_backward_grad_sync = False
-        yield
-        self.require_backward_grad_sync = True
-        
+
     def _post_backward(self):
         """
         A post-backward callback that waits for gradient synchronization to finish, then copies 

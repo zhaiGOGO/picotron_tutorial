@@ -6,12 +6,12 @@ Binary files step5_data_parallel_naive/__pycache__/process_group_manager.cpython
 Binary files step5_data_parallel_naive/__pycache__/tensor_parallel.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/tensor_parallel.cpython-39.pyc differ
 Binary files step5_data_parallel_naive/__pycache__/utils.cpython-39.pyc and step6_data_parallel_bucket/__pycache__/utils.cpython-39.pyc differ
 diff -x '*.diff' --new-file -ur step5_data_parallel_naive/data_parallel.py step6_data_parallel_bucket/data_parallel.py
---- step5_data_parallel_naive/data_parallel.py	2024-11-17 13:09:01.000000000 +0000
-+++ step6_data_parallel_bucket/data_parallel.py	2024-11-17 13:08:38.000000000 +0000
-@@ -43,4 +43,233 @@
-         yield
-         self.require_backward_grad_sync = True
- 
+--- step5_data_parallel_naive/data_parallel.py	2024-11-19 14:30:21.000000000 +0000
++++ step6_data_parallel_bucket/data_parallel.py	2024-11-19 14:30:01.000000000 +0000
+@@ -31,4 +31,226 @@
+             dist.all_reduce(grad, op=dist.ReduceOp.SUM, group=pgm.process_group_manager.dp_group)
+             grad /= pgm.process_group_manager.dp_world_size
+         return grad
 -### end Data Parallel (naive)
 \ No newline at end of file
 +### end Data Parallel (naive)
@@ -218,14 +218,7 @@ diff -x '*.diff' --new-file -ur step5_data_parallel_naive/data_parallel.py step6
 +                    # mark the parameter as ready for gradient synchronization. 
 +                    bucket_manager.mark_param_as_ready(param) 
 +        return param_hook
-+    
-+    @contextlib.contextmanager
-+    def no_sync(self):
-+        """A context manager to disable gradient synchronization."""
-+        self.require_backward_grad_sync = False
-+        yield
-+        self.require_backward_grad_sync = True
-+        
++
 +    def _post_backward(self):
 +        """
 +        A post-backward callback that waits for gradient synchronization to finish, then copies 
