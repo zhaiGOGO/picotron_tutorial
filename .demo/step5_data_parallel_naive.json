@@ -1,0 +1,50 @@
+{
+  "$schema": "https://elio.dev/demo-time.schema.json",
+  "title": "Step 5: Data Parallel (naive)",
+  "description": "",
+  "demos": [
+    {
+      "title": "new changes for step 5",
+      "description": "",
+      "steps": [
+        {
+          "action": "open",
+          "path": "/step5_data_parallel_naive/patch_step_5.diff"
+        }
+      ]
+    },
+    {
+      "title": "dataloader.py -> Distributed Sampler",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step5_data_parallel_naive/dataloader.py",
+          "position": "28:34"
+        }
+      ]
+    },
+    {
+      "title": "data_parallel -> register_backward_hook",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step5_data_parallel_naive/data_parallel.py",
+          "position": "16"
+        }
+      ]
+    },
+    {
+      "title": "data_parallel -> last batch",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step5_data_parallel_naive/train.py",
+          "position": "37:39"
+        }
+      ]
+    }
+  ]
+}
