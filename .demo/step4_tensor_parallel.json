@@ -1,0 +1,223 @@
+{
+  "$schema": "https://elio.dev/demo-time.schema.json",
+  "title": "Step 4: Tensor Parallel",
+  "description": "",
+  "demos": [
+    {
+      "title": "new changes for step 4",
+      "description": "",
+      "steps": [
+        {
+          "action": "open",
+          "path": "/step4_tensor_parallel/patch_step_4.diff"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> apply_tensor_parallel",
+      "description": "",
+      "steps": [
+        {
+          "action": "open",
+          "path": "/step4_tensor_parallel/tensor_parallel.py"
+        },
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "72:115"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> Attention",
+      "description": "",
+      "steps": [
+        {
+          "action": "open",
+          "path": "/step4_tensor_parallel/model.py"
+        },
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/model.py",
+          "position": "56:65"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (local partition)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "128:129"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (weight init)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "133:141"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (reset_parameters)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "143:161"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> RowParallel (weight init)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "173:193"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> RowParallel (reset_parameters)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "195:213"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (forward) part 1",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "164:166"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (forward) part 2",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "83"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> RowParallel (forward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "215:220"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (backward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "62:68"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> RowParallel (backward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "29:30"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel Last Layer (forward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "167:169"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel Last Layer (backward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "48:53"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> VocabParallel (split embedding)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "246:249"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> VocabParallel (compute embedding)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "291:299"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> VocabParallel (zero out)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "300:301"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> VocabParallel (all_reduce)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "302"
+        }
+      ]
+    }
+  ]
+}
