@@ -104,6 +104,17 @@
           "position": "44:47"
         }
       ]
+    },
+    {
+      "title": "train.py -> init process group",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step2_process_group_manager/train.py",
+          "position": "63:64"
+        }
+      ]
     }
   ]
 }
