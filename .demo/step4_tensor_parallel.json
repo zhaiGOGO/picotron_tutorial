@@ -24,22 +24,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "72:115"
-        }
-      ]
-    },
-    {
-      "title": "tensor_parallel.py -> Attention",
-      "description": "",
-      "steps": [
-        {
-          "action": "open",
-          "path": "/step4_tensor_parallel/model.py"
-        },
-        {
-          "action": "highlight",
-          "path": "/step4_tensor_parallel/model.py",
-          "position": "56:65"
+          "position": "68:111"
         }
       ]
     },
@@ -55,24 +40,13 @@
       ]
     },
     {
-      "title": "tensor_parallel.py -> ColumnParallel (weight init)",
-      "description": "",
-      "steps": [
-        {
-          "action": "highlight",
-          "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "133:141"
-        }
-      ]
-    },
-    {
       "title": "tensor_parallel.py -> ColumnParallel (reset_parameters)",
       "description": "",
       "steps": [
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "143:161"
+          "position": "139:157"
         }
       ]
     },
@@ -83,7 +57,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "173:193"
+          "position": "180"
         }
       ]
     },
@@ -94,7 +68,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "195:213"
+          "position": "191:209"
         }
       ]
     },
@@ -105,7 +79,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "164:166"
+          "position": "159:162"
         }
       ]
     },
@@ -116,7 +90,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "83"
+          "position": "79"
         }
       ]
     },
@@ -127,18 +101,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "215:220"
-        }
-      ]
-    },
-    {
-      "title": "tensor_parallel.py -> ColumnParallel (backward)",
-      "description": "",
-      "steps": [
-        {
-          "action": "highlight",
-          "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "62:68"
+          "position": "211:216"
         }
       ]
     },
@@ -149,7 +112,18 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "29:30"
+          "position": "26:28"
+        }
+      ]
+    },
+    {
+      "title": "tensor_parallel.py -> ColumnParallel (backward)",
+      "description": "",
+      "steps": [
+        {
+          "action": "highlight",
+          "path": "/step4_tensor_parallel/tensor_parallel.py",
+          "position": "59:64"
         }
       ]
     },
@@ -160,7 +134,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "167:169"
+          "position": "163:165"
         }
       ]
     },
@@ -171,7 +145,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "48:53"
+          "position": "46:51"
         }
       ]
     },
@@ -182,7 +156,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "246:249"
+          "position": "242:245"
         }
       ]
     },
@@ -193,7 +167,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "291:299"
+          "position": "287:295"
         }
       ]
     },
@@ -204,7 +178,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "300:301"
+          "position": "296:297"
         }
       ]
     },
@@ -215,7 +189,7 @@
         {
           "action": "highlight",
           "path": "/step4_tensor_parallel/tensor_parallel.py",
-          "position": "302"
+          "position": "298"
         }
       ]
     }
