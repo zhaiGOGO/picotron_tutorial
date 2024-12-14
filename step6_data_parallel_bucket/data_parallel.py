@@ -8,6 +8,7 @@ import process_group_manager as pgm
 
 ### begin Data Parallel (naive)
 class DataParallelNaive(nn.Module):
+    # Shouldn't be use with gradient accumulation (because it will accumulates gradient in bfloat16 and not float32)
     def __init__(self, module):
         super().__init__()
         self.module = module
@@ -169,6 +170,7 @@ class DataParallelBucket(nn.Module):
         self.require_backward_grad_sync = True
         grad_size = 2 # bfloat16 gradient: 2 bytes
         # number of gradients in one bucket
+        # 1 MB = 1024 KB = 1024 * 1024 bytes
         bucket_size = bucket_cap_mb * 1024 * 1024 // grad_size
         self.bucket_manager = BucketManager(module.parameters(), pgm.process_group_manager.dp_group, bucket_size, grad_type)
         self.register_backward_hook()
