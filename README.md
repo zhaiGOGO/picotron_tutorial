@@ -1,5 +1,11 @@
 # Picotron tutorial
 
+## Videos 🎬
+
+> More to come
+
+- 🎬 [[Picotron tutorial] Part 1: Model, Process Group Manager, Dataloader](https://youtu.be/u2VSwDDpaBM)
+
 ## Setup 
 
 ```
