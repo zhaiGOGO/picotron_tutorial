@@ -1,8 +1,8 @@
 # Picotron tutorial
 
-## Videos 🎬
+## Videos
 
-> More to come
+> More to come. Full playlist [here](https://www.youtube.com/playlist?list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S) 🎬
 
 - 🎬 [[Picotron tutorial] Part 1: Model, Process Group Manager, Dataloader](https://youtu.be/u2VSwDDpaBM)
 
