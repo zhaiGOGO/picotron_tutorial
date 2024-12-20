@@ -19,6 +19,7 @@ if __name__ == "__main__":
     # Environment arguments
     parser.add_argument("--omp_num_threads", type=str, default="1")
     parser.add_argument("--tokenizers_parallelism", type=str, default="false")
+    parser.add_argument("--use_cpu", action="store_true")
 
     # Model arguments
     parser.add_argument("--model_name", type=str, default="HuggingFaceTB/SmolLM-360M-Instruct")
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     local_rank = int(os.environ["LOCAL_RANK"])
     global_rank = int(os.environ["RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
-    backend = "nccl"
+    backend = "nccl" if not args.use_cpu else "gloo"
     torch.cuda.set_device(local_rank)
     device = torch.device("cuda", local_rank)
     dtype = torch.bfloat16
