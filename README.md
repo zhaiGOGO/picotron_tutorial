@@ -1,5 +1,7 @@
 # Picotron tutorial
 
+A step by step tutorial on how to build [Picotron]((https://github.com/huggingface/picotron)) distributed training framework form scratch 🔥
+
 ## Videos
 
 > More to come. Full playlist [here](https://www.youtube.com/playlist?list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S) 🎬
