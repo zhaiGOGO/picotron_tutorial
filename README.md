@@ -7,6 +7,7 @@ A step by step tutorial on how to build [Picotron]((https://github.com/huggingfa
 > More to come. Full playlist [here](https://www.youtube.com/playlist?list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S) 🎬
 
 - 🎬 [[Picotron tutorial] Part 1: Model, Process Group Manager, Dataloader](https://youtu.be/u2VSwDDpaBM)
+- 🎬 [[Picotron tutorial] Part 2: Tensor Parallel](https://www.youtube.com/watch?v=qUMPaSWi5HI&list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S&index=3)
 
 ## Setup 
 
