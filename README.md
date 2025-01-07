@@ -1,6 +1,6 @@
 # Picotron tutorial
 
-A step by step tutorial on how to build [Picotron]((https://github.com/huggingface/picotron)) distributed training framework form scratch 🔥
+A step by step tutorial on how to build [Picotron](https://github.com/huggingface/picotron) distributed training framework form scratch 🔥
 
 ## Videos
 
