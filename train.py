@@ -1,8 +1,10 @@
 """
 torchrun --nproc_per_node 1 train.py
+torchrun --nproc_per_node 2 train.py --tp_size 2 --run_name process_group_manager --use_wandb
 """
 
 import os
+import wandb
 import datetime
 import torch
 import torch.nn.functional as F
@@ -12,6 +14,8 @@ from torch.optim import AdamW
 from transformers import AutoConfig
 
 from picotron.model import Llama
+import picotron.process_group_manager as pgm
+from picotron.process_group_manager import setup_process_group_manager
 
 from picotron.utils import print, set_all_seed
 
@@ -34,6 +38,12 @@ if __name__ == "__main__":
     parser.add_argument("--seq_len", type=int, default=64)
     parser.add_argument("--micro_batch_size", type=int, default=1)
 
+    # Distributed training args
+    parser.add_argument("--tp_size", type=int, default=1, help="Tensor Parallel size")
+    parser.add_argument("--dp_size", type=int, default=1, help="Data Parallel size")
+    parser.add_argument("--pp_size", type=int, default=1, help="Pipeline Parallel size")
+    parser.add_argument("--pp_engine", type=str, default="afab", choices=["1f1b", "afab"])
+
     # Logging args
     parser.add_argument("--run_name", type=str, default="default_run")
     parser.add_argument("--use_wandb", action="store_true")
@@ -54,8 +64,23 @@ if __name__ == "__main__":
     dtype = torch.bfloat16
 
     dist.init_process_group(rank=global_rank, world_size=world_size, backend=backend, init_method=f"env://", timeout=datetime.timedelta(minutes=2))
+    setup_process_group_manager(dp_size=args.dp_size, pp_size=args.pp_size, tp_size=args.tp_size)
+    is_wandb_rank = pgm.process_group_manager.tp_rank == 0 and pgm.process_group_manager.pp_rank == 0 and pgm.process_group_manager.dp_rank == 0
 
     set_all_seed(args.seed)
+    if is_wandb_rank and args.use_wandb:
+        wandb.init(
+            project="picotron_tutorial",
+            name=f"{args.run_name}_{pgm.process_group_manager}",
+            config={
+                "tensor_parallel_size": pgm.process_group_manager.tp_world_size,
+                "pipeline_parallel_size": pgm.process_group_manager.pp_world_size,
+                "data_parallel_size": pgm.process_group_manager.dp_world_size,
+                "model": args.model_name,
+                "learning_rate": args.learning_rate,
+                "seed": args.seed,
+            },
+        )
 
     model_config = AutoConfig.from_pretrained(args.model_name)
     model_config.num_hidden_layers = args.num_hidden_layers
@@ -63,7 +88,7 @@ if __name__ == "__main__":
     model_config.num_key_value_heads = args.num_key_value_heads
     model_config.max_position_embeddings = args.seq_len
 
-    print(model_config, is_print_rank=(global_rank == 0))
+    # print(model_config, is_print_rank=(global_rank == 0))
 
     model = Llama(config=model_config)
     model.to(dtype).to(device)
@@ -71,7 +96,7 @@ if __name__ == "__main__":
 
     dist.barrier()
 
-    print(model, is_print_rank=(global_rank == 0))
+    # print(model, is_print_rank=(global_rank == 0))
     optimizer = AdamW(model.parameters(), lr=args.learning_rate)
 
     dist.barrier()
@@ -92,6 +117,13 @@ if __name__ == "__main__":
 
     optimizer.step()
 
-    print(f"Loss: {loss.item():.4f}", is_print_rank=(global_rank == 0))
+    # print(f"Loss: {loss.item():.4f}", is_print_rank=(global_rank == 0))
+    print(f"[rank {pgm.process_group_manager.global_rank}], Loss: {loss:.4f}")
+
+    if is_wandb_rank and args.use_wandb:
+        wandb.log({"loss": loss.item()})
+
+    if is_wandb_rank and args.use_wandb:
+        wandb.finish()
 
     dist.destroy_process_group()
